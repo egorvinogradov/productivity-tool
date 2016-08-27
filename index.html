@@ -1,0 +1,78 @@
+<html>
+<head>
+  <title>Things Counter</title>
+</head>
+<body>
+<textarea autofocus style="width: 70%; height: 50%"></textarea>
+<h1></h1>
+<h2></h2>
+
+<script>
+  var textarea = document.getElementsByTagName('textarea')[0];
+  var h1 = document.getElementsByTagName('h1')[0];
+  var h2 = document.getElementsByTagName('h2')[0];
+
+  function calcRange(str){
+    var range = str.replace(/([0-9]+)([a-z]+)/g, '$1-$2').split('-');
+    if (range[1] === 'm' || range[1] === 'min') {
+      return +range[0];
+    }
+    else if (range[1] === 'h') {
+      return +range[0] * 60;
+    }
+    else {
+      return 0;
+    }
+  }
+
+  function calcTime(text){
+    var mins = 0;
+    text.split(/\n/).map(function(row){
+      if (/^\-\s+/i.test(row)) {
+        var vals = row
+          .replace(/^\-\s+([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+(.+)$/i, '@@@$1@@@$2@@@$3@@@')
+          .split(/[@]{3,}/g)
+          .filter(function(s){
+            return s;
+          });
+
+        if (vals.length === 2) {
+          mins += calcRange(vals[0]);
+        }
+        else if (vals.length === 3) {
+          mins += calcRange(vals[0]);
+          mins += calcRange(vals[1]);
+        }
+        console.log('>', vals);
+      }
+
+      var result = Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
+      h1.innerHTML = result;
+
+      var end = new Date(+new Date() + (mins * 60 * 1000));
+      h2.innerHTML = 'Finish: ' + end.toLocaleString();
+
+    });
+  }
+
+  textarea.addEventListener('paste', function(){
+    textarea.value = '';
+    setTimeout(function(){
+      calcTime(textarea.value.trim());
+    }, 100);
+  }, false);
+
+  textarea.addEventListener('dragover', function(){
+    textarea.value = '';
+  }, false);
+
+  textarea.addEventListener('drop', function(){
+    setTimeout(function(){
+      calcTime(textarea.value.trim());
+    }, 100);
+  }, false);
+  
+
+</script>
+</body>
+</html>
