@@ -2,8 +2,11 @@
 <head>
   <title>Things Counter</title>
 </head>
-<body>
+<body style="padding: 30px">
 <textarea autofocus style="width: 70%; height: 50%"></textarea>
+<p>
+  <button>Calculate</button>
+</p>
 <h1></h1>
 <h2></h2>
 
@@ -14,6 +17,7 @@
 
 <script>
   var textarea = document.getElementsByTagName('textarea')[0];
+  var button = document.getElementsByTagName('button')[0];
   var h1 = document.getElementsByTagName('h1')[0];
   var h2 = document.getElementsByTagName('h2')[0];
 
@@ -60,23 +64,21 @@
     });
   }
 
-  textarea.addEventListener('paste', function(){
-    textarea.value = '';
+  button.addEventListener('click', onInit, false);
+  textarea.addEventListener('paste', onInit, false);
+  textarea.addEventListener('drop', onInit, false);
+
+  // textarea.addEventListener('dragover', clearText, false);
+
+  function onInit(){
     setTimeout(function(){
       calcTime(textarea.value.trim());
     }, 100);
-  }, false);
+  }
 
-  textarea.addEventListener('dragover', function(){
+  function clearText(){
     textarea.value = '';
-  }, false);
-
-  textarea.addEventListener('drop', function(){
-    setTimeout(function(){
-      calcTime(textarea.value.trim());
-    }, 100);
-  }, false);
-  
+  }
 
 </script>
 </body>
