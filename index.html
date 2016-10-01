@@ -2,13 +2,14 @@
 <head>
   <title>Things Counter</title>
 </head>
-<body style="padding: 30px">
+<body style="padding: 30px; font-family: BlinkMacSystemFont;">
 <textarea autofocus style="width: 70%; height: 50%"></textarea>
 <p>
   <button>Calculate</button>
 </p>
-<h1></h1>
-<h2></h2>
+<h1 id="total" style="font-weight: normal"></h1>
+<p id="finish"></p>
+<p id="breaks"></p>
 
 <!--
   Generate bookmark from console:
@@ -18,8 +19,9 @@
 <script>
   var textarea = document.getElementsByTagName('textarea')[0];
   var button = document.getElementsByTagName('button')[0];
-  var h1 = document.getElementsByTagName('h1')[0];
-  var h2 = document.getElementsByTagName('h2')[0];
+  var totalValue = document.getElementById('total');
+  var finishValue = document.getElementById('finish');
+  var breaksValue = document.getElementById('breaks');
 
   function calcRange(str){
     var range = str.replace(/([0-9]+)([a-z]+)/g, '$1-$2').split('-');
@@ -34,10 +36,22 @@
     }
   }
 
+  function formatTime(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var strTime = hours + ':' + minutes + ' ' + ampm;
+    return strTime;
+  }
+
   function calcTime(text){
-    var mins = 0;
-    text.split(/\n/).map(function(row){
+    var minutesTotal = 0;
+    window.items = text.split(/\n/).map(function(row){
       if (/^\-\s+/i.test(row)) {
+        var data = {};
         var vals = row
           .replace(/^\-\s+([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+(.+)$/i, '@@@$1@@@$2@@@$3@@@')
           .split(/[@]{3,}/g)
@@ -46,22 +60,37 @@
           });
 
         if (vals.length === 2) {
-          mins += calcRange(vals[0]);
+          data.minutes = calcRange(vals[0]);
+          data.timeStr = vals[0];
+          data.text = vals[1];
+          minutesTotal += data.minutes;
         }
         else if (vals.length === 3) {
-          mins += calcRange(vals[0]);
-          mins += calcRange(vals[1]);
+          data.minutes = calcRange(vals[0]);
+          data.minutes += calcRange(vals[1]);
+          data.timeStr = vals[0] + ' ' + vals[1];
+          data.text = vals[2];
+          minutesTotal += data.minutes;
         }
-        console.log('>', vals);
+        data.text = data.text.replace(/\s*\([^\)]+$/, '');
+        console.log('-', vals, data);
       }
-
-      var result = Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
-      h1.innerHTML = result;
-
-      var end = new Date(+new Date() + (mins * 60 * 1000));
-      h2.innerHTML = 'Finish: ' + end.toLocaleString();
-
+      return data;
+    }).filter(function(item){
+      return item;
     });
+
+    var breakMinutes = (minutesTotal / 52) * 15;
+    var endTime = new Date(+new Date() + (minutesTotal * 60 * 1000));
+    var endWithBreaksTime = new Date(+new Date() + ((minutesTotal + breakMinutes) * 60 * 1000));
+    
+    totalValue.innerHTML = Math.floor(minutesTotal / 60) + 'h ' + (minutesTotal % 60) + 'm';
+    finishValue.innerHTML = 'Finish: ' + formatTime(endTime);
+    breaksValue.innerHTML = 'With Breaks: ' + formatTime(endWithBreaksTime);
+
+    textarea.value = window.items.map(function(item){
+      return '- ' + item.timeStr + ' ' + item.text;
+    }).join('\n') + '\n';
   }
 
   button.addEventListener('click', onInit, false);
