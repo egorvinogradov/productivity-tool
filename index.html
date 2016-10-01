@@ -14,6 +14,7 @@
 
 <!--
   Generate bookmark from console:
+  
   copy('data:text/html;charset=utf-8, ' + document.documentElement.outerHTML.replace(/\n/gm, ' ').replace(/\s+/g, ' '))
 -->
 
@@ -110,6 +111,10 @@
 
   function clearText(){
     textarea.value = '';
+  }
+
+  window.onbeforeunload = function(){
+    return true;
   }
 
 </script>
