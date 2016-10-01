@@ -8,6 +8,7 @@
   <button>Calculate</button>
 </p>
 <h1 id="total" style="font-weight: normal"></h1>
+<p id="current"></p>
 <p id="finish"></p>
 <p id="breaks"></p>
 
@@ -21,6 +22,7 @@
   var button = document.getElementsByTagName('button')[0];
   var totalValue = document.getElementById('total');
   var finishValue = document.getElementById('finish');
+  var currentValue = document.getElementById('current');
   var breaksValue = document.getElementById('breaks');
 
   function calcRange(str){
@@ -85,6 +87,7 @@
     var endWithBreaksTime = new Date(+new Date() + ((minutesTotal + breakMinutes) * 60 * 1000));
     
     totalValue.innerHTML = Math.floor(minutesTotal / 60) + 'h ' + (minutesTotal % 60) + 'm';
+    currentValue.innerHTML = 'Now: ' + formatTime(new Date());
     finishValue.innerHTML = 'Finish: ' + formatTime(endTime);
     breaksValue.innerHTML = 'With Breaks: ' + formatTime(endWithBreaksTime);
 
