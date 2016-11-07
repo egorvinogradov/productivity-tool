@@ -75,22 +75,32 @@
           data.text = vals[2];
           minutesTotal += data.minutes;
         }
-        data.text = data.text.replace(/\s*\([^\)]+$/, '');
-        console.log('-', vals, data);
+
+        window._z = vals;
+        console.log('>>>\n\n', window._z);
+
+        if (data.text) {
+          data.text = data.text.replace(/\s*\([^\)]*$/, '');
+          console.log('-', vals, data);
+        }
       }
       return data;
     }).filter(function(item){
-      return item;
+      return item && item.text && item.minutes;
     });
 
-    var breakMinutes = (minutesTotal / 52) * 15;
+
+    var breakMinutes = Math.round((minutesTotal / 52) * 15);
+    var minutesWithBreaksTotal = breakMinutes + minutesTotal;
     var endTime = new Date(+new Date() + (minutesTotal * 60 * 1000));
     var endWithBreaksTime = new Date(+new Date() + ((minutesTotal + breakMinutes) * 60 * 1000));
     
-    totalValue.innerHTML = Math.floor(minutesTotal / 60) + 'h ' + (minutesTotal % 60) + 'm';
+    var total = Math.floor(minutesTotal / 60) + 'h ' + (minutesTotal % 60) + 'm';
+    var totalWithBreaks = Math.floor(minutesWithBreaksTotal / 60) + 'h ' + (minutesWithBreaksTotal % 60) + 'm';
+    totalValue.innerHTML = 'Approx. ' + totalWithBreaks + ' (' + total + ' exactly)';
     currentValue.innerHTML = 'Now: ' + formatTime(new Date());
-    finishValue.innerHTML = 'Finish: ' + formatTime(endTime);
-    breaksValue.innerHTML = 'With Breaks: ' + formatTime(endWithBreaksTime);
+    finishValue.innerHTML = 'Exact Finish: ' + formatTime(endTime);
+    breaksValue.innerHTML = 'Estimate Finish: ' + formatTime(endWithBreaksTime);
 
     textarea.value = window.items.map(function(item){
       return '- ' + item.timeStr + ' ' + item.text;
@@ -113,9 +123,12 @@
     textarea.value = '';
   }
 
+  /*  
   window.onbeforeunload = function(){
     return true;
   }
+  */
+
 
 </script>
 </body>
