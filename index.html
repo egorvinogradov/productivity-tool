@@ -53,10 +53,11 @@
   function calcTime(text){
     var minutesTotal = 0;
     window.items = text.split(/\n/).map(function(row){
-      if (/^\-\s+/i.test(row)) {
+      row = row.trim();
+      if (/^\-\s+/i.test(row) || /^([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+/i.test(row)) {
         var data = {};
         var vals = row
-          .replace(/^\-\s+([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+(.+)$/i, '@@@$1@@@$2@@@$3@@@')
+          .replace(/^(?:\-\s+)?([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+(.+)$/i, '@@@$1@@@$2@@@$3@@@')
           .split(/[@]{3,}/g)
           .filter(function(s){
             return s;
