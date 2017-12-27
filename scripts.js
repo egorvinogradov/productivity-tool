@@ -26,9 +26,8 @@ function setValuesFromGetParams(){
   }
   
   for (var key in params) {
-    var el = $(`#${key}`);
-    if (el) {
-      el.val(params[key]);
+    if (key) {
+      $(`#${key}`).val(params[key]);
     }
   }
 }
@@ -64,7 +63,7 @@ function calcProductivity(){
   hoursNeeded = Math.floor(hoursNeeded);
 
   let maxProductivity = getMaxProductivityThisWeek(currentProductiveHours, currentUnproductiveHours, plannedHoursPerDay, totalExpectedDistraction);
-  $('#hoursNeededForDesiredProductivity').text(`${hoursNeeded} h ${minutesNeeded} min`);
+  $('#hoursNeededForDesiredProductivity').text(`${hoursNeeded}h ${minutesNeeded}min`);
   $('#maxProductivityThisWeek').text((maxProductivity * 100).toFixed(2) + '%');
 }
 
@@ -185,21 +184,19 @@ function clearText(){
 }
 
 
-$(() => {
-  console.log('Init app');
-  setValuesFromGetParams();
+console.log('Init app');
+setValuesFromGetParams();
 
-  $('#calcTodosButton').on('click', onInit);
-  $('#calcProductivityButton').on('click', calcProductivity);
-  $('#todoTextarea')
-    .on('paste', onInit)
-    .on('drop', onInit)
-    .on('dragover', clearText);
+$('#calcTodosButton').on('click', onInit);
+$('#calcProductivityButton').on('click', calcProductivity);
+$('#todoTextarea')
+  .on('paste', onInit)
+  .on('drop', onInit)
+  .on('dragover', clearText);
 
-  $('#productivity').on('submit', (e) => {
-    e.preventDefault();
-    calcProductivity();
-  });
+$('#productivity').on('submit', (e) => {
+  e.preventDefault();
+  calcProductivity();
 });
 
 
