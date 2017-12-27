@@ -1,16 +1,107 @@
 <html>
 <head>
   <title>Things Counter</title>
+  <style>
+    body {
+      padding: 30px;
+      font-family: BlinkMacSystemFont;
+    }
+    #productivity {
+      position: absolute;
+      right: 30px;
+      top: 37px;
+      width: calc(30vw - 60px);
+      line-height: 1.3em;
+      padding-bottom: 30px;
+    }
+    #productivity > h3 {
+      margin: 0 0 20px 0;
+    }
+    #productivity input {
+      width: 40px;
+      height: 25px;
+      padding-left: 6px;
+    }
+    #productivity > p {
+      margin-bottom: 6px;
+    }
+    #productivity > p > span {
+      display: inline-block;
+      width: 205px;
+      transform: translateY(2px);
+    }
+    #productivity hr {
+      margin: 31px 0 25px 0;
+      border: 0;
+      border-bottom: 1px solid rgba(0,0,0,.2);
+      background: none;
+      color: transparent;
+      height: 0;
+    }
+    #productivity code {
+      font: bold 16px Menlo;
+    }
+    #productivity > p.last {
+      margin-top: 30px;
+    }
+    textarea {
+      width: 70%;
+      height: 50%;
+      padding: 5px;
+    }
+    textarea, input {
+      border: 1px solid rgba(0,0,0,.25);
+      /*border-radius: 2px;*/
+    }
+  </style>
 </head>
-<body style="padding: 30px; font-family: BlinkMacSystemFont;">
-<textarea autofocus style="width: 70%; height: 50%"></textarea>
+<body>
+
+<textarea autofocus id="todoTextarea" placeholder="Drag items from Things"></textarea>
 <p>
-  <button>Calculate</button>
+  <button id="calcTodosButton">Calculate</button>
 </p>
 <h1 id="total" style="font-weight: normal"></h1>
 <p id="current"></p>
 <p id="finish"></p>
 <p id="breaks"></p>
+
+<form id="productivity">
+  <h3>Productity:</h3>
+  <p>
+    <span>Desired productivity</span>
+    <input id="desiredProductivity"/> %
+  </p>
+  <p>
+    <span>Current productive hours</span>
+    <input id="currentProductiveHours"/>
+    <input id="currentProductiveMinutes"/>
+  </p>
+  <p>
+    <span>Current distracting hours</span>
+    <input id="currentUnproductiveHours"/>
+    <input id="currentUnproductiveMinutes"/>
+  </p>
+  <p>
+    <span>Planned hours per day</span>
+    <input id="plannedHoursPerDay" placeholder="15" />
+  </p>
+  <p>
+    <span>Total expected distraction</span>
+    <input id="totalExpectedDistraction" placeholder="2" /> h
+  </p>
+  <hr>
+  <p>
+    <b>Productive hours needed for desired productivity:</b>
+    <div><code id="hoursNeededForDesiredProductivity"></code></div>
+  </p>
+  <p class="last">
+    <b>Max productivity this week:</b>
+    <div><code id="maxProductivityThisWeek"></code></div>
+  </p>
+
+  <button id="calcProductivityButton">Calculate</button>
+</div>
 
 <!--
   Generate bookmark from console:
@@ -18,119 +109,8 @@
   copy('data:text/html;charset=utf-8, ' + document.documentElement.outerHTML.replace(/\n/gm, ' ').replace(/\s+/g, ' '))
 -->
 
-<script>
-  var textarea = document.getElementsByTagName('textarea')[0];
-  var button = document.getElementsByTagName('button')[0];
-  var totalValue = document.getElementById('total');
-  var finishValue = document.getElementById('finish');
-  var currentValue = document.getElementById('current');
-  var breaksValue = document.getElementById('breaks');
+<script src="jquery-3.2.1.js"></script>
+<script src="scripts.js"></script>
 
-  function calcRange(str){
-    var range = str.replace(/([0-9]+)([a-z]+)/g, '$1-$2').split('-');
-    if (range[1] === 'm' || range[1] === 'min') {
-      return +range[0];
-    }
-    else if (range[1] === 'h') {
-      return +range[0] * 60;
-    }
-    else {
-      return 0;
-    }
-  }
-
-  function formatTime(date) {
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    minutes = minutes < 10 ? '0'+minutes : minutes;
-    var strTime = hours + ':' + minutes + ' ' + ampm;
-    return strTime;
-  }
-
-  function calcTime(text){
-    var minutesTotal = 0;
-    window.items = text.split(/\n/).map(function(row){
-      row = row.trim();
-      if (/^\-\s+/i.test(row) || /^([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+/i.test(row)) {
-        var data = {};
-        var vals = row
-          .replace(/^(?:\-\s+)?([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+(.+)$/i, '@@@$1@@@$2@@@$3@@@')
-          .split(/[@]{3,}/g)
-          .filter(function(s){
-            return s;
-          });
-
-        if (vals.length === 2) {
-          data.minutes = calcRange(vals[0]);
-          data.timeStr = vals[0];
-          data.text = vals[1];
-          minutesTotal += data.minutes;
-        }
-        else if (vals.length === 3) {
-          data.minutes = calcRange(vals[0]);
-          data.minutes += calcRange(vals[1]);
-          data.timeStr = vals[0] + ' ' + vals[1];
-          data.text = vals[2];
-          minutesTotal += data.minutes;
-        }
-
-        window._z = vals;
-        console.log('>>>\n\n', window._z);
-
-        if (data.text) {
-          data.text = data.text.replace(/\s*\([^\)]*$/, '');
-          console.log('-', vals, data);
-        }
-      }
-      return data;
-    }).filter(function(item){
-      return item && item.text && item.minutes;
-    });
-
-
-    var breakMinutes = Math.round((minutesTotal / 52) * 15);
-    var minutesWithBreaksTotal = breakMinutes + minutesTotal;
-    var endTime = new Date(+new Date() + (minutesTotal * 60 * 1000));
-    var endWithBreaksTime = new Date(+new Date() + ((minutesTotal + breakMinutes) * 60 * 1000));
-    
-    var total = Math.floor(minutesTotal / 60) + 'h ' + (minutesTotal % 60) + 'm';
-    var totalWithBreaks = Math.floor(minutesWithBreaksTotal / 60) + 'h ' + (minutesWithBreaksTotal % 60) + 'm';
-    totalValue.innerHTML = 'Approx. ' + totalWithBreaks + ' (' + total + ' exactly)';
-    currentValue.innerHTML = 'Now: ' + formatTime(new Date());
-    finishValue.innerHTML = 'Exact Finish: ' + formatTime(endTime);
-    breaksValue.innerHTML = 'Estimate Finish: ' + formatTime(endWithBreaksTime);
-
-    textarea.value = window.items.map(function(item){
-      return '- ' + item.timeStr + ' ' + item.text;
-    }).join('\n') + '\n';
-  }
-
-  button.addEventListener('click', onInit, false);
-  textarea.addEventListener('paste', onInit, false);
-  textarea.addEventListener('drop', onInit, false);
-
-  /* textarea.addEventListener('dragover', clearText, false); */
-
-  function onInit(){
-    setTimeout(function(){
-      calcTime(textarea.value.trim());
-    }, 100);
-  }
-
-  function clearText(){
-    textarea.value = '';
-  }
-
-  /*  
-  window.onbeforeunload = function(){
-    return true;
-  }
-  */
-
-
-</script>
 </body>
 </html>
