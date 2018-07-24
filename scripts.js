@@ -16,10 +16,12 @@ function setValuesFromGetParams(){
         params.currentUnproductiveHours = +value.split(':')[0];
         params.currentUnproductiveMinutes = +value.split(':')[1];
       }
-      else {
+      else if (key) {
         params[key] = +value;
       }
     });
+
+
 
   if (Object.keys(params).length) {
     $('#desiredProductivity').focus();
