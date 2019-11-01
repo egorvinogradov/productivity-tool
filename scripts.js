@@ -121,9 +121,9 @@ function formatTime(date) {
 function parseTodoRow(row){
   row = row.trim();
   let data = {};
-  if (/^\-\s+/i.test(row) || /^([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+/i.test(row)) {
+  if (/^\-\s[0-9]+\/[0-9]+\/[0-9]+\s\[[\s|+]\]/i.test(row) || /^([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+/i.test(row)) {
     let vals = row
-      .replace(/^(?:\-\s+)?([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+(.+)$/i, '@@@$1@@@$2@@@$3@@@')
+      .replace(/^(?:\-\s+)?(?:[0-9]+\/[0-9]+\/[0-9]+\s\[[\s|+]\]\s)?([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+(.+)$/i, '@@@$1@@@$2@@@$3@@@')
       .split(/[@]{3,}/g)
       .filter(s => s);
 
@@ -163,13 +163,14 @@ function calcTime(text){
   
   const total = Math.floor(minutesTotal / 60) + 'h ' + (minutesTotal % 60) + 'm';
   const totalWithBreaks = Math.floor(minutesWithBreaksTotal / 60) + 'h ' + (minutesWithBreaksTotal % 60) + 'm';
-  const updatedTodos = items.map(item => `- ${item.timeStr} ${item.text}`).join('\n') + '\n';
+  const updatedTodos = items.map(item => `${item.timeStr} ${item.text}`).join('\n') + '\n';
   window.items = items;
 
   $('#total').html(`Approx. ${totalWithBreaks} (${total} exactly)`);
   $('#current').html(`Now: ${formatTime(new Date())}`);
   $('#finish').html(`Exact Finish: ${formatTime(endTime)}`);
   $('#breaks').html(`Estimate Finish: ${formatTime(endWithBreaksTime)}`);
+
   $('#todoTextarea').val(updatedTodos);
 }
 
@@ -193,8 +194,7 @@ $('#calcTodosButton').on('click', onInit);
 $('#calcProductivityButton').on('click', calcProductivity);
 $('#todoTextarea')
   .on('paste', onInit)
-  .on('drop', onInit)
-  .on('dragover', clearText);
+  .on('drop', onInit);
 
 $('#productivity').on('submit', (e) => {
   e.preventDefault();
