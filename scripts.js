@@ -101,6 +101,9 @@ function calcRange(str){
   else if (range[1] === 'h') {
     return +range[0] * 60;
   }
+  if (range[1] === 'd') {
+    return +range[0] * 60 * 24;
+  }
   else {
     return 0;
   }
