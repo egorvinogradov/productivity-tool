@@ -122,32 +122,54 @@ function formatTime(date) {
 
 
 function parseTodoRow(row){
-  row = row.trim();
-  let data = {};
-  if (/^\-\s[0-9]+\/[0-9]+\/[0-9]+\s\[[\s]\]/i.test(row) || /^([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+/i.test(row)) {
-    let vals = row
-      .replace(/^(?:\-\s+)?(?:[0-9]+\/[0-9]+\/[0-9]+\s\[[\s]\]\s)?([0-9]+[a-z]+)\s?([0-9]+[a-z]+)?\s+(.+)$/i, '@@@$1@@@$2@@@$3@@@')
-      .split(/[@]{3,}/g)
-      .filter(s => s);
+  row = row.split(/\n/)[0].trim();
 
-    if (vals.length === 2) {
-      data.minutes = calcRange(vals[0]);
-      data.timeStr = vals[0];
-      data.text = vals[1];
-    }
-    else if (vals.length === 3) {
-      data.minutes = calcRange(vals[0]);
-      data.minutes += calcRange(vals[1]);
-      data.timeStr = vals[0] + ' ' + vals[1];
-      data.text = vals[2];
-    }
+  let isThingsFormattedRow = /^-\s+[0-9]+\/[0-9]+\/[0-9]+\s+/.test(row);
+  let rowContent;
+  let statusStr;
 
-    if (data.text) {
-      data.text = data.text.replace(/\s*\([^\)]*$/, '');
-      console.log('-', vals, data);
+  if (isThingsFormattedRow) {
+    [ statusStr, rowContent ] = row
+      .replace(/^-\s+[0-9]+\/[0-9]+\/[0-9]+\s+\[(.)\]\s+(.*)$/i, '$1@@@$2')
+      .split('@@@');
+
+    let isCompleteTodo = Boolean(statusStr.trim());
+    if (isCompleteTodo) {
+      return;
     }
   }
-  return data;
+  else {
+    rowContent = row;
+  }
+
+  let [ timeStr1, timeStr2, text ] = rowContent
+    .replace(/^([0-9]+(?:min|m|h|d))?\s?([0-9]+(?:min|m|h|d))?\s?(.*)$/i, '$1@@@$2@@@$3')
+    .split('@@@');
+
+  let minutes1 = calcRange(timeStr1);
+  let minutes2 = calcRange(timeStr2);
+  let minutes = minutes1 + minutes2;
+
+  let timeStr = [timeStr1, timeStr2].filter(str => str.trim()).join(' ');
+
+  console.log('-', {
+    minutes,
+    minutes1,
+    minutes2,
+    timeStr,
+    timeStr1,
+    timeStr2,
+    text,
+    statusStr,
+    rowContent,
+    row,
+  });
+
+  return {
+    minutes,
+    timeStr,
+    text,
+  };
 }
 
 
