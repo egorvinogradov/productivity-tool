@@ -124,22 +124,32 @@ function formatTime(date) {
 function parseTodoRow(row){
   row = row.split(/\n/)[0].trim();
 
-  let isThingsFormattedRow = /^-\s+[0-9]+\/[0-9]+\/[0-9]+\s+/.test(row);
+  // e.g. - 03/05/2023 [x] 40m Text
+  let isDateFirstFormatting = /^-\s+[0-9]+\/[0-9]+\/[0-9]+\s+/.test(row);
+
+  // e.g. - [x] 03/05/2023 40m Text
+  let isCheckFirstFormatting = /^-\s+\[.\]\s+/.test(row);
+
   let rowContent;
   let statusStr;
 
-  if (isThingsFormattedRow) {
+  if (isDateFirstFormatting) {
     [ statusStr, rowContent ] = row
       .replace(/^-\s+[0-9]+\/[0-9]+\/[0-9]+\s+\[(.)\]\s+(.*)$/i, '$1@@@$2')
       .split('@@@');
-
-    let isCompleteTodo = Boolean(statusStr.trim());
-    if (isCompleteTodo) {
-      return;
-    }
+  }
+  else if (isCheckFirstFormatting) {
+    [ statusStr, rowContent ] = row
+      .replace(/^-\s+\[(.)\]\s+[0-9]+\/[0-9]+\/[0-9]+\s+(.*)$/i, '$1@@@$2')
+      .split('@@@');
   }
   else {
     rowContent = row;
+  }
+
+  let isCompleteTodo = Boolean(statusStr?.trim?.());
+  if (isCompleteTodo) {
+    return;
   }
 
   let [ timeStr1, timeStr2, text ] = rowContent
