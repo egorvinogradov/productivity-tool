@@ -125,7 +125,7 @@ function parseTodoRow(row){
   row = row.split(/\n/)[0].trim();
 
   // e.g. - 03/05/2023 [x] 40m Text
-  let isDateFirstFormatting = /^-\s+[0-9]+\/[0-9]+\/[0-9]+\s+/.test(row);
+  let isDateFirstFormatting = /^-\s+[0-9]+[\/\.][0-9]+[\/\.][0-9]+\s+/.test(row);
 
   // e.g. - [x] 03/05/2023 40m Text
   let isCheckFirstFormatting = /^-\s+\[.\]\s+/.test(row);
@@ -135,12 +135,12 @@ function parseTodoRow(row){
 
   if (isDateFirstFormatting) {
     [ statusStr, rowContent ] = row
-      .replace(/^-\s+[0-9]+\/[0-9]+\/[0-9]+\s+\[(.)\]\s+(.*)$/i, '$1@@@$2')
+      .replace(/^-\s+[0-9]+[\/\.][0-9]+[\/\.][0-9]+\s+\[(.)\]\s+(.*)$/i, '$1@@@$2')
       .split('@@@');
   }
   else if (isCheckFirstFormatting) {
     [ statusStr, rowContent ] = row
-      .replace(/^-\s+\[(.)\]\s+[0-9]+\/[0-9]+\/[0-9]+\s+(.*)$/i, '$1@@@$2')
+      .replace(/^-\s+\[(.)\]\s+[0-9]+[\/\.][0-9]+[\/\.][0-9]+\s+(.*)$/i, '$1@@@$2')
       .split('@@@');
   }
   else {
