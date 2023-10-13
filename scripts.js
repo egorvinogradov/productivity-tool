@@ -42,17 +42,8 @@ function calcProductivity(){
   let currentUnproductiveMinutes = +$('#currentUnproductiveMinutes').val();
 
   let desiredProductivity = +$('#desiredProductivity').val() / 100;
-  let plannedHoursPerDay = $('#plannedHoursPerDay').val();
-  let totalExpectedDistraction = $('#totalExpectedDistraction').val();
-
-  if (plannedHoursPerDay === '') {
-    plannedHoursPerDay = 15;
-  }
-  if (totalExpectedDistraction === '') {
-    totalExpectedDistraction = 2;
-  }
-  plannedHoursPerDay = +plannedHoursPerDay;
-  totalExpectedDistraction = +totalExpectedDistraction;
+  let plannedHoursPerDay = +$('#plannedHoursPerDay').val() || +$('#plannedHoursPerDay').attr('placeholder');
+  let totalExpectedDistraction = +$('#totalExpectedDistraction').val() || +$('#totalExpectedDistraction').attr('placeholder');
 
   if (currentProductiveMinutes) {
     currentProductiveHours = currentProductiveHours + (currentProductiveMinutes / 60);
