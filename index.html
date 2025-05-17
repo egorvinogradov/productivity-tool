@@ -1,5 +1,6 @@
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
   <title>Things Counter</title>
   <style>
     body {
@@ -91,17 +92,19 @@
     <input id="totalExpectedDistraction" placeholder="2" /> h
   </p>
   <hr>
-  <p>
+
+  <div>
     <b>Productive hours needed for desired productivity:</b>
-    <div><code id="hoursNeededForDesiredProductivity"></code></div>
-  </p>
-  <p class="last">
+    <p><code id="hoursNeededForDesiredProductivity"></code></p>
+  </div>
+
+  <div class="last">
     <b>Max productivity this week:</b>
-    <div><code id="maxProductivityThisWeek"></code></div>
-  </p>
+    <p><code id="maxProductivityThisWeek"></code></p>
+  </div>
 
   <button id="calcProductivityButton">Calculate</button>
-</div>
+</form>
 
 <!--
   Generate bookmark from console:

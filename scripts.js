@@ -1,12 +1,11 @@
-
 function setValuesFromGetParams(){
   let params = {};
   window.location.search
     .replace(/^\?/, '')
     .split('&')
     .forEach(function(pair){
-      var key = pair.split('=')[0];
-      var value = pair.split('=')[1];
+      let key = pair.split('=')[0];
+      let value = pair.split('=')[1];
 
       if (key === 'currentProductiveHours') {
         params.currentProductiveHours = +value.split(':')[0];
@@ -26,8 +25,8 @@ function setValuesFromGetParams(){
   if (Object.keys(params).length) {
     $('#desiredProductivity').focus();
   }
-  
-  for (var key in params) {
+
+  for (let key in params) {
     if (key) {
       $(`#${key}`).val(params[key]);
     }
@@ -81,7 +80,7 @@ function getMaxProductivityThisWeek(currentProductiveHours, currentUnproductiveH
     hoursLeft = hoursLeft + daysLeft * plannedHoursPerDay;
   }
   return (currentProductiveHours + hoursLeft) / (currentProductiveHours + currentUnproductiveHours + hoursLeft + totalExpectedDistraction);
-};
+}
 
 
 function calcRange(str){
@@ -113,37 +112,14 @@ function formatTime(date) {
 
 
 function parseTodoRow(row){
-  row = row.split(/\n/)[0].trim();
+  row = row.split(/\n/)[0].trim().replace(/^-\s*/, '').trim();
 
-  // e.g. - 03/05/2023 [x] 40m Text
-  let isDateFirstFormatting = /^-\s+[0-9]+[\/\.][0-9]+[\/\.][0-9]+\s+/.test(row);
-
-  // e.g. - [x] 03/05/2023 40m Text
-  let isCheckFirstFormatting = /^-\s+\[.\]\s+/.test(row);
-
-  let rowContent;
-  let statusStr;
-
-  if (isDateFirstFormatting) {
-    [ statusStr, rowContent ] = row
-      .replace(/^-\s+[0-9]+[\/\.][0-9]+[\/\.][0-9]+\s+\[(.)\]\s+(.*)$/i, '$1@@@$2')
-      .split('@@@');
-  }
-  else if (isCheckFirstFormatting) {
-    [ statusStr, rowContent ] = row
-      .replace(/^-\s+\[(.)\]\s+[0-9]+[\/\.][0-9]+[\/\.][0-9]+\s+(.*)$/i, '$1@@@$2')
-      .split('@@@');
-  }
-  else {
-    rowContent = row;
-  }
-
-  let isCompleteTodo = Boolean(statusStr?.trim?.());
-  if (isCompleteTodo) {
+  let isCompletedOrCancelled = /^[🚫🛑❌✅]/i.test(row) || row.startsWith('[COMPLETE]');
+  if (isCompletedOrCancelled) {
     return;
   }
 
-  let [ timeStr1, timeStr2, text ] = rowContent
+  let [ timeStr1, timeStr2, text ] = row
     .replace(/^([0-9]+(?:min|m|h|d))?\s?([0-9]+(?:min|m|h|d))?\s?(.*)$/i, '$1@@@$2@@@$3')
     .split('@@@');
 
@@ -161,8 +137,6 @@ function parseTodoRow(row){
     timeStr1,
     timeStr2,
     text,
-    statusStr,
-    rowContent,
     row,
   });
 
@@ -179,14 +153,14 @@ function calcTime(text){
   const items = text.split(/\n/)
     .map(parseTodoRow)
     .filter(row => row && row.text && row.minutes);
-  
+
   items.forEach(row => { minutesTotal += row.minutes; });
 
   const breakMinutes = Math.round((minutesTotal / 52) * 15);
   const minutesWithBreaksTotal = breakMinutes + minutesTotal;
   const endTime = new Date(+new Date() + (minutesTotal * 60 * 1000));
   const endWithBreaksTime = new Date(+new Date() + ((minutesTotal + breakMinutes) * 60 * 1000));
-  
+
   const total = Math.floor(minutesTotal / 60) + 'h ' + (minutesTotal % 60) + 'm';
   const totalWithBreaks = Math.floor(minutesWithBreaksTotal / 60) + 'h ' + (minutesWithBreaksTotal % 60) + 'm';
   const updatedTodos = items.map(item => `${item.timeStr} ${item.text}`).join('\n') + '\n';
